@@ -150,3 +150,21 @@ export const createSafeProxy = (name: string) => {
         rpc: () => Promise.resolve({ data: null, error: null }),
     } as any
 }
+
+// ============================================
+// PHASE 4: MEMBERSHIPS MOCK DATA
+// ============================================
+
+export const MOCK_PLANS = [
+    { id: 'plan1', name: 'Básico', price: 800, duration_days: 30, features: ['Acceso sala', 'Seguimiento básico'], is_active: true },
+    { id: 'plan2', name: 'Pro', price: 1200, duration_days: 30, features: ['Acceso sala', 'Rutinas personalizadas', 'Analytics', 'Nutrición'], is_active: true },
+    { id: 'plan3', name: 'Elite', price: 1800, duration_days: 30, features: ['Todo Pro', 'Sesiones 1:1', 'Suplementación', 'Reporte mensual PDF'], is_active: true },
+]
+
+export const MOCK_MEMBERSHIPS = [
+    { id: 'm1', user_id: '1', plan_id: 'plan2', status: 'active', starts_at: '2026-02-01', ends_at: '2026-03-01', athlete_name: 'MARÍA GARCIA', plan_name: 'Pro', price: 1200 },
+    { id: 'm2', user_id: '2', plan_id: 'plan1', status: 'active', starts_at: '2026-02-10', ends_at: '2026-03-10', athlete_name: 'PABLO PALOMINOS', plan_name: 'Básico', price: 800 },
+    { id: 'm3', user_id: '3', plan_id: 'plan3', status: 'active', starts_at: '2026-01-15', ends_at: '2026-02-25', athlete_name: 'JUAN PÉREZ', plan_name: 'Elite', price: 1800 },
+    { id: 'm4', user_id: '4', plan_id: 'plan1', status: 'expired', starts_at: '2026-01-01', ends_at: '2026-01-31', athlete_name: 'ANA SOTO', plan_name: 'Básico', price: 800 },
+    { id: 'm5', user_id: '5', plan_id: 'plan2', status: 'suspended', starts_at: '2026-02-05', ends_at: '2026-03-05', athlete_name: 'CARLOS MENDEZ', plan_name: 'Pro', price: 1200 },
+]

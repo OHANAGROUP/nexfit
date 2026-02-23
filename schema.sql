@@ -277,3 +277,49 @@ LEFT JOIN training_schedule ts ON ts.user_id = p.id
 GROUP BY p.id, p.tenant_id, p.full_name;
 
 
+-- ============================================
+-- PHASE 4: MEMBERSHIPS
+-- ============================================
+
+-- 14. MEMBERSHIP PLANS
+CREATE TABLE IF NOT EXISTS membership_plans (
+  id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_id     UUID REFERENCES tenants(id) ON DELETE CASCADE,
+  name          TEXT NOT NULL,
+  price         NUMERIC(10,2) NOT NULL,
+  duration_days INT NOT NULL DEFAULT 30,
+  features      JSONB DEFAULT '[]',
+  is_active     BOOLEAN DEFAULT TRUE,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 15. MEMBERSHIPS
+CREATE TABLE IF NOT EXISTS memberships (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  tenant_id   UUID REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id     UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  plan_id     UUID REFERENCES membership_plans(id) ON DELETE SET NULL,
+  status      TEXT DEFAULT 'active', -- active | expired | suspended | cancelled
+  starts_at   DATE NOT NULL DEFAULT CURRENT_DATE,
+  ends_at     DATE NOT NULL,
+  notes       TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE membership_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE memberships ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "plans_manage" ON membership_plans;
+CREATE POLICY "plans_manage" ON membership_plans
+  FOR ALL TO authenticated USING (tenant_id = public.get_auth_tenant());
+
+DROP POLICY IF EXISTS "memberships_manage" ON memberships;
+CREATE POLICY "memberships_manage" ON memberships
+  FOR ALL TO authenticated USING (tenant_id = public.get_auth_tenant());
+
+-- Auto-expire function
+CREATE OR REPLACE FUNCTION public.auto_expire_memberships()
+RETURNS void AS $$
+  UPDATE memberships SET status = 'expired'
+  WHERE ends_at < CURRENT_DATE AND status = 'active';
+$$ LANGUAGE sql SECURITY DEFINER SET search_path = public;

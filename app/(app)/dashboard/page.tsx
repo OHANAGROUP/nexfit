@@ -1,11 +1,11 @@
 'use client'
 import { BentoCard } from "@/components/ui/BentoCard";
 import {
-    useAuth, useAthletes, useAnalytics, useNotifications
+    useAuth, useAthletes, useAnalytics, useNotifications, useMemberships
 } from "@/lib/supabase/hooks";
 import {
     Users, Dumbbell, Activity, TrendingUp, Bell, Zap,
-    ArrowRight, AlertTriangle, Trophy, BarChart2
+    ArrowRight, AlertTriangle, Trophy, BarChart2, CreditCard
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,7 @@ export default function DashboardPage() {
     const { athletes, loading: loadingAthletes } = useAthletes();
     const { analytics, loading: loadingAnalytics } = useAnalytics();
     const { notifications, unreadCount } = useNotifications();
+    const { activeCount: membActive, expiringCount, loading: loadingMemb } = useMemberships();
 
     const adherence = analytics?.summary?.adherence_avg ?? '—';
     const streak = analytics?.summary?.streak_max ?? '—';
@@ -64,7 +65,7 @@ export default function DashboardPage() {
             </header>
 
             {/* KPI Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                 <BentoCard
                     title="Atletas Activos"
                     value={loadingAthletes ? "..." : athletes.length.toString()}
@@ -92,6 +93,13 @@ export default function DashboardPage() {
                     subtitle="Requieren atención"
                     icon={Bell}
                     color="purple"
+                />
+                <BentoCard
+                    title="Memb. Activas"
+                    value={loadingMemb ? "..." : membActive.toString()}
+                    subtitle={expiringCount > 0 ? `${expiringCount} vencen pronto` : "Todas al día"}
+                    icon={CreditCard}
+                    color="neon"
                 />
             </div>
 
@@ -126,6 +134,26 @@ export default function DashboardPage() {
                         </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-nex-muted group-hover:text-nex-neon group-hover:translate-x-1 transition-all" />
+                </Link>
+
+                <Link href="/membresias" className="glass-card p-5 flex items-center justify-between group hover:border-yellow-400/40 transition-all">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center relative">
+                            <CreditCard className="w-5 h-5 text-yellow-400" />
+                            {expiringCount > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-yellow-500 text-black text-[9px] font-black flex items-center justify-center">
+                                    {expiringCount}
+                                </span>
+                            )}
+                        </div>
+                        <div>
+                            <div className="font-black italic tracking-tighter">MEMBRESÍAS</div>
+                            <div className="text-[10px] text-nex-muted uppercase tracking-widest font-bold">
+                                {expiringCount > 0 ? `${expiringCount} por vencer` : `${membActive} activas`}
+                            </div>
+                        </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-nex-muted group-hover:text-yellow-400 group-hover:translate-x-1 transition-all" />
                 </Link>
             </div>
 

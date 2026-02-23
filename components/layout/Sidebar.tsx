@@ -14,9 +14,10 @@ import {
     CalendarDays,
     BarChart2,
     Bell,
+    CreditCard,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useNotifications } from '@/lib/supabase/hooks'
+import { useNotifications, useMemberships } from '@/lib/supabase/hooks'
 
 const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -28,12 +29,14 @@ const navItems = [
     { icon: TrendingUp, label: 'Tracking', href: '/tracking' },
     { icon: BarChart2, label: 'Analytics', href: '/analytics' },
     { icon: Bell, label: 'Alertas', href: '/notificaciones', badge: true },
+    { icon: CreditCard, label: 'Membresías', href: '/membresias', memberBadge: true },
 ]
 
 
 export function Sidebar() {
     const pathname = usePathname()
     const { unreadCount } = useNotifications()
+    const { expiringCount } = useMemberships()
 
     return (
         <aside className="w-64 h-screen glass-card rounded-none border-y-0 border-l-0 bg-nex-black/60 hidden md:flex flex-col p-6 fixed left-0 top-0 z-40">
@@ -51,6 +54,7 @@ export function Sidebar() {
                     const Icon = item.icon
                     const isActive = pathname === item.href
                     const showBadge = item.badge && unreadCount > 0
+                    const showMemberBadge = item.memberBadge && expiringCount > 0
 
                     return (
                         <Link
@@ -71,6 +75,11 @@ export function Sidebar() {
                                 {showBadge && (
                                     <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-orange-500 text-white text-[8px] font-black flex items-center justify-center">
                                         {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                                {showMemberBadge && (
+                                    <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-yellow-500 text-black text-[8px] font-black flex items-center justify-center">
+                                        {expiringCount > 9 ? '9+' : expiringCount}
                                     </span>
                                 )}
                             </div>

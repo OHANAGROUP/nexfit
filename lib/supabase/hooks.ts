@@ -408,3 +408,117 @@ export function useNotifications() {
     return { notifications, loading, isMock, markRead, unreadCount }
 }
 
+// ============================================
+// PHASE 4: MEMBERSHIPS
+// ============================================
+
+export function useMembershipPlans() {
+    const [plans, setPlans] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        async function fetchPlans() {
+            try {
+                const supabase = createClient()
+                const { data, error } = await (supabase as any)
+                    .from('membership_plans')
+                    .select('*')
+                    .eq('is_active', true)
+                    .order('price', { ascending: true })
+
+                if (error || !data || data.length === 0) {
+                    const { MOCK_PLANS } = await import('./data')
+                    setPlans(MOCK_PLANS)
+                } else {
+                    setPlans(data)
+                }
+            } catch {
+                const { MOCK_PLANS } = await import('./data')
+                setPlans(MOCK_PLANS)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchPlans()
+    }, [])
+
+    return { plans, loading }
+}
+
+export function useMemberships(athleteId?: string) {
+    const [memberships, setMemberships] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [isMock, setIsMock] = useState(false)
+
+    const fetchMemberships = async () => {
+        try {
+            const supabase = createClient()
+            let query = (supabase as any)
+                .from('memberships')
+                .select('*, membership_plans(name, price), profiles(full_name)')
+                .order('ends_at', { ascending: true })
+
+            if (athleteId) query = query.eq('user_id', athleteId)
+
+            const { data, error } = await query
+
+            if (error || !data || data.length === 0) {
+                const { MOCK_MEMBERSHIPS } = await import('./data')
+                setMemberships(athleteId
+                    ? MOCK_MEMBERSHIPS.filter((m: any) => m.user_id === athleteId)
+                    : MOCK_MEMBERSHIPS)
+                setIsMock(true)
+            } else {
+                setMemberships(data.map((m: any) => ({
+                    ...m,
+                    athlete_name: m.profiles?.full_name ?? 'Atleta',
+                    plan_name: m.membership_plans?.name ?? '—',
+                    price: m.membership_plans?.price ?? 0,
+                })))
+            }
+        } catch {
+            const { MOCK_MEMBERSHIPS } = await import('./data')
+            setMemberships(MOCK_MEMBERSHIPS)
+            setIsMock(true)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => { fetchMemberships() }, [athleteId])
+
+    const createMembership = async (payload: {
+        user_id: string; plan_id: string; starts_at: string; ends_at: string; notes?: string
+    }) => {
+        try {
+            const supabase = createClient()
+            await (supabase as any).from('memberships').insert({
+                ...payload,
+                status: 'active',
+            })
+            await fetchMemberships()
+        } catch { /* resilient */ }
+    }
+
+    const updateStatus = async (id: string, status: string) => {
+        setMemberships(prev => prev.map(m => m.id === id ? { ...m, status } : m))
+        try {
+            const supabase = createClient()
+            await (supabase as any).from('memberships').update({ status }).eq('id', id)
+        } catch { /* resilient */ }
+    }
+
+    const expiringCount = memberships.filter((m: any) => {
+        if (m.status !== 'active') return false
+        const daysLeft = Math.ceil((new Date(m.ends_at).getTime() - Date.now()) / 86400000)
+        return daysLeft <= 7 && daysLeft >= 0
+    }).length
+
+    const activeCount = memberships.filter((m: any) => m.status === 'active').length
+    const monthlyRevenue = memberships
+        .filter((m: any) => m.status === 'active')
+        .reduce((sum: number, m: any) => sum + (m.price || 0), 0)
+
+    return { memberships, loading, isMock, createMembership, updateStatus, expiringCount, activeCount, monthlyRevenue }
+}
+
