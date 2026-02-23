@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 import {
     Search,
     UserPlus,
@@ -147,10 +148,14 @@ export default function DirectorioPage() {
                                         <Link href={`/progreso/${athlete.id}`} className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10 text-nex-neon flex items-center justify-center hover:bg-nex-neon hover:text-black transition-all active:scale-90" title="Ver Progreso">
                                             <ImageIcon className="w-5 h-5" />
                                         </Link>
-                                        <button className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-nex-white text-nex-black flex items-center justify-center hover:bg-nex-neon transition-all active:scale-90" title="Ver Protocolos">
+                                        <Link
+                                            href={`/protocolos?athleteId=${athlete.id}`}
+                                            className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-nex-white text-nex-black flex items-center justify-center hover:bg-nex-neon transition-all active:scale-90" title="Ver Protocolos">
                                             <Dumbbell className="w-5 h-5" />
-                                        </button>
-                                        <button className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-nex-purple transition-all active:scale-90" title="Ver Análisis">
+                                        </Link>
+                                        <button
+                                            onClick={() => toast.success('Módulo de Análisis: Próximamente en v3.12')}
+                                            className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-nex-purple transition-all active:scale-90" title="Ver Análisis">
                                             <LineChart className="w-5 h-5" />
                                         </button>
                                     </div>
