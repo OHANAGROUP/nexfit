@@ -1,0 +1,76 @@
+.mavi-coach-container {
+    @apply fixed bottom-10 right-10 z-50 flex flex-col items-center transition-all duration-500 ease-in-out;
+}
+
+.mavi-coach-sprite {
+    @apply w-24 h-24 bg-contain bg-no-repeat bg-center cursor-pointer hover:scale-110 active:rotate-12 transition-transform;
+    filter: drop-shadow(0 0 10px rgba(123, 47, 255, 0.4));
+}
+
+.mavi-coach-sprite.mirror {
+    transform: scaleX(-1);
+}
+
+.boss-bubble {
+    @apply absolute bottom-full mb-4 bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl text-nex-black font-bold text-xs uppercase tracking-tight shadow-2xl opacity-0 scale-90 translate-y-4 pointer-events-none transition-all duration-300;
+}
+
+.boss-bubble.show {
+    @apply opacity-100 scale-100 translate-y-0;
+}
+
+.boss-bubble::after {
+    content: '';
+    @apply absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white/90;
+}
+
+.boss-angry-shake {
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes shake {
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+/* Base frames - using existing coach images from legacy assets */
+.don_frame_walk_1,
+.don_frame_walk_2,
+.don_frame_walk_3,
+.don_frame_walk_4 {
+    background-image: url('/assets/img/mavi_coach.png');
+}
+
+.don_frame_sleep_1 {
+    background-image: url('/assets/img/mavi_coach_reactions.png');
+    background-position: center;
+}
+
+.don_frame_angry {
+    background-image: url('/assets/img/mavi_coach_reactions.png');
+    background-position: left center;
+}
+
+.don_frame_point {
+    background-image: url('/assets/img/mavi_coach_reactions.png');
+    background-position: right center;
+}

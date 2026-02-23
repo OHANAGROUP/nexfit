@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --background: #0a0a0f;
+    --foreground: #f0f0ff;
+}
+
+body {
+    color: var(--foreground);
+    background: var(--background);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+}
+
+@layer base {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+}
+
+.glass-card {
+    @apply bg-nex-card/40 backdrop-blur-xl border border-white/10 rounded-3xl;
+}
+
+.neon-border {
+    @apply border-nex-neon shadow-neon-glow;
+}
+
+.purple-gradient {
+    @apply bg-gradient-to-br from-nex-purple to-nex-lila;
+}
