@@ -52,9 +52,27 @@ export default function CalendarioPage() {
 
     const toggleStatus = async (session: any) => {
         const next = session.status === 'planned' ? 'done' : session.status === 'done' ? 'skipped' : 'planned'
+        let rpeValue = session.rpe
+
+        if (next === 'done') {
+            const input = window.prompt('Esfuerzo Percibido (RPE 1-10):', '7')
+            if (input !== null) {
+                const val = parseFloat(input)
+                if (!isNaN(val) && val >= 1 && val <= 10) {
+                    rpeValue = val
+                }
+            } else {
+                return // User cancelled
+            }
+        }
+
         try {
             const supabase = createClient()
-            await (supabase as any).from('training_schedule').update({ status: next }).eq('id', session.id)
+            await (supabase as any).from('training_schedule').update({
+                status: next,
+                rpe: next === 'done' ? rpeValue : null
+            }).eq('id', session.id)
+            // Local state update omitted for simplicity in mock mode, usually handled by re-fetch
         } catch { /* resilient */ }
     }
 
@@ -133,6 +151,11 @@ export default function CalendarioPage() {
                                 <div className={cn("flex-1 rounded-xl border p-2 text-center flex flex-col items-center justify-center gap-1 transition-all", cfg.color)}>
                                     <StatusIcon className="w-4 h-4" />
                                     <span className="text-[9px] font-bold uppercase tracking-widest">{cfg.label}</span>
+                                    {session.status === 'done' && session.rpe && (
+                                        <div className="text-[10px] font-black bg-black/20 px-1.5 py-0.5 rounded-lg mt-1 border border-white/10">
+                                            RPE {session.rpe}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="flex-1 rounded-xl border border-dashed border-white/5 flex items-center justify-center">
@@ -158,9 +181,17 @@ export default function CalendarioPage() {
                                     <div className="text-[11px] text-nex-muted">{new Date(s.scheduled_for + 'T12:00').toLocaleDateString('es', { day: 'numeric', month: 'short' })}</div>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-nex-purple" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest">{cfg.label}</span>
+                            <div className="flex items-center gap-3">
+                                {s.status === 'done' && s.rpe && (
+                                    <div className="flex flex-col items-end">
+                                        <div className="text-[8px] font-bold text-nex-muted uppercase">Esfuerzo</div>
+                                        <div className="text-xs font-black text-nex-neon">RPE {s.rpe}</div>
+                                    </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                    <Zap className="w-4 h-4 text-nex-purple" />
+                                    <span className="text-[10px] font-bold uppercase tracking-widest">{cfg.label}</span>
+                                </div>
                             </div>
                         </div>
                     )

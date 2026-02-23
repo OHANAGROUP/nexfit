@@ -20,8 +20,8 @@ const PLAN_COLOR: Record<string, string> = {
     'Elite': 'text-nex-neon',
 }
 
-function daysLeft(endsAt: string) {
-    return Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86400000)
+function daysLeft(expiresAt: string) {
+    return Math.ceil((new Date(expiresAt).getTime() - Date.now()) / 86400000)
 }
 
 function formatDate(d: string) {
@@ -36,13 +36,13 @@ function NewMembershipModal({ plans, onClose, onCreate }: {
     const [planId, setPlanId] = useState(plans[0]?.id ?? '')
     const [startsAt, setStartsAt] = useState(new Date().toISOString().split('T')[0])
     const selectedPlan = plans.find(p => p.id === planId)
-    const endsAt = selectedPlan
+    const expiresAt = selectedPlan
         ? new Date(new Date(startsAt).getTime() + selectedPlan.duration_days * 86400000).toISOString().split('T')[0]
         : ''
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        onCreate({ user_id: athleteId || Date.now().toString(), plan_id: planId, starts_at: startsAt, ends_at: endsAt, _athlete_name: athleteName, _plan_name: selectedPlan?.name, _price: selectedPlan?.price })
+        onCreate({ user_id: athleteId || Date.now().toString(), plan_id: planId, starts_at: startsAt, expires_at: expiresAt, _athlete_name: athleteName, _plan_name: selectedPlan?.name, _price: selectedPlan?.price })
         onClose()
     }
 
@@ -84,10 +84,10 @@ function NewMembershipModal({ plans, onClose, onCreate }: {
                             onChange={e => setStartsAt(e.target.value)}
                         />
                     </div>
-                    {endsAt && (
+                    {expiresAt && (
                         <div className="flex items-center gap-2 text-xs text-nex-muted px-1">
                             <Calendar className="w-3 h-3" />
-                            <span>Vence el <strong className="text-nex-white">{formatDate(endsAt)}</strong></span>
+                            <span>Vence el <strong className="text-nex-white">{formatDate(expiresAt)}</strong></span>
                         </div>
                     )}
                     <div className="flex gap-3 pt-2">
@@ -223,7 +223,7 @@ export default function MembresiasPage() {
                     {filtered.map((m: any) => {
                         const cfg = STATUS_CONFIG[m.status] ?? STATUS_CONFIG.cancelled
                         const Icon = cfg.icon
-                        const days = daysLeft(m.ends_at)
+                        const days = daysLeft(m.expires_at)
                         const isExpiring = m.status === 'active' && days <= 7 && days >= 0
 
                         return (
@@ -244,7 +244,7 @@ export default function MembresiasPage() {
                                         <span className="text-[10px] text-nex-muted">${(m.price || 0).toLocaleString('es-CL')}/mes</span>
                                         <span className="text-[10px] text-nex-muted flex items-center gap-1">
                                             <Calendar className="w-3 h-3" />
-                                            Vence {formatDate(m.ends_at)}
+                                            Vence {formatDate(m.expires_at)}
                                         </span>
                                         {isExpiring && (
                                             <span className="text-[10px] text-yellow-400 font-bold">⚠ {days}d restantes</span>

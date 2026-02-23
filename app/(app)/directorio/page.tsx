@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
     Search,
     UserPlus,
@@ -9,7 +10,8 @@ import {
     Edit3,
     MoreHorizontal,
     ChevronRight,
-    Loader2
+    Loader2,
+    ImageIcon
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAthletes, useAuth } from '@/lib/supabase/hooks'
@@ -121,19 +123,19 @@ export default function DirectorioPage() {
                                         </div>
                                     </div>
                                 </td>
-                                <td className="px-8 py-6 glass-card border-none rounded-r-3xl group-hover:bg-white/[0.05] text-right">
-                                    <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
-                                        <button className="w-10 h-10 rounded-xl bg-nex-white text-nex-black flex items-center justify-center hover:bg-nex-neon transition-all active:scale-90" title="Ver Protocolos">
+                                <td className="px-4 py-6 md:px-8 glass-card border-none rounded-r-3xl group-hover:bg-white/[0.05] text-right">
+                                    <div className="flex justify-end gap-2 md:gap-3 md:opacity-0 md:group-hover:opacity-100 transition-all md:translate-x-4 md:group-hover:translate-x-0">
+                                        <Link href={`/progreso/${athlete.id}`} className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10 text-nex-neon flex items-center justify-center hover:bg-nex-neon hover:text-black transition-all active:scale-90" title="Ver Progreso">
+                                            <ImageIcon className="w-5 h-5" />
+                                        </Link>
+                                        <button className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-nex-white text-nex-black flex items-center justify-center hover:bg-nex-neon transition-all active:scale-90" title="Ver Protocolos">
                                             <Dumbbell className="w-5 h-5" />
                                         </button>
-                                        <button className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-nex-purple transition-all active:scale-90" title="Ver Análisis">
+                                        <button className="w-11 h-11 md:w-10 md:h-10 rounded-xl bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-nex-purple transition-all active:scale-90" title="Ver Análisis">
                                             <LineChart className="w-5 h-5" />
                                         </button>
-                                        <button className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-nex-muted hover:text-white flex items-center justify-center transition-all active:scale-90">
-                                            <Edit3 className="w-4 h-4" />
-                                        </button>
                                     </div>
-                                    <div className="group-hover:hidden text-nex-muted">
+                                    <div className="md:group-hover:hidden text-nex-muted md:block hidden">
                                         <ChevronRight className="w-5 h-5 ml-auto" />
                                     </div>
                                 </td>

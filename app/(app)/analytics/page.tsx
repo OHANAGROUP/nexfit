@@ -1,13 +1,15 @@
 'use client'
 import {
-    BarChart2, TrendingUp, Users, Zap, Activity, Loader2
+    BarChart2, TrendingUp, Users, Zap, Activity, Loader2, Sparkles
 } from 'lucide-react'
 import {
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, BarChart, Bar
 } from 'recharts'
 import { cn } from '@/lib/utils'
-import { useAnalytics } from '@/lib/supabase/hooks'
+import { useAnalytics, useMemberships, useNotifications } from '@/lib/supabase/hooks'
+import { buildContextPhrase } from '@/lib/mavicoach/insights'
+import { VolumeChart } from '@/components/analytics/VolumeChart'
 
 function StatCard({ label, value, sub, color = 'purple' }: { label: string; value: string | number; sub?: string; color?: string }) {
     return (
@@ -33,6 +35,8 @@ const TOOLTIP_STYLE = {
 
 export default function AnalyticsPage() {
     const { analytics, loading, isMock } = useAnalytics()
+    const { activeCount, expiringCount, monthlyRevenue } = useMemberships()
+    const { unreadCount } = useNotifications()
 
     if (loading) return (
         <div className="flex items-center justify-center h-64">
@@ -55,6 +59,34 @@ export default function AnalyticsPage() {
                 </h1>
                 <p className="text-nex-muted text-sm mt-1">Rendimiento agregado del equipo — Últimas 4 semanas</p>
             </header>
+
+            {/* Mavi AI Insight Strip */}
+            {(() => {
+                const ctx = analytics ? {
+                    adherence_avg: summary.adherence_avg ?? 0,
+                    sessions_done: summary.sessions_done ?? 0,
+                    streak_max: summary.streak_max ?? 0,
+                    alerts_pending: summary.alerts_pending ?? 0,
+                    athlete_leaderboard: athlete_leaderboard ?? [],
+                    expiring_memberships: expiringCount,
+                    active_memberships: activeCount,
+                    monthly_revenue: monthlyRevenue,
+                    unread_notifications: unreadCount,
+                } : null
+                const insight = ctx ? buildContextPhrase(ctx) : null
+                if (!insight) return null
+                return (
+                    <div className="flex items-start gap-3 px-4 py-3 rounded-xl border border-nex-purple/20 bg-nex-purple/5 text-sm">
+                        <div className="shrink-0 w-7 h-7 rounded-full bg-nex-purple/20 border border-nex-purple/30 flex items-center justify-center mt-0.5">
+                            <Sparkles className="w-3.5 h-3.5 text-nex-neon" />
+                        </div>
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-widest text-nex-purple mr-2">MAVI AI</span>
+                            <span className="text-nex-white/80 text-xs">{insight}</span>
+                        </div>
+                    </div>
+                )
+            })()}
 
             {/* KPI Row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -177,6 +209,18 @@ export default function AnalyticsPage() {
                         <Bar dataKey="done" fill="#7b2fff" radius={[4, 4, 0, 0]} name="Completadas" />
                     </BarChart>
                 </ResponsiveContainer>
+            </div>
+
+            {/* Volume Analytics */}
+            <div className="glass-card p-8 rounded-3xl border-white/5 relative overflow-hidden">
+                <div className="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 className="text-xl font-black italic tracking-tighter uppercase font-rajdhani">Distribución de <span className="text-nex-neon">Volumen</span></h3>
+                        <p className="text-[10px] text-nex-muted font-bold uppercase tracking-widest mt-1">Carga acumulada (Tonnaje) por grupo muscular</p>
+                    </div>
+                    <Activity className="w-5 h-5 text-nex-purple" />
+                </div>
+                <VolumeChart />
             </div>
         </div>
     )

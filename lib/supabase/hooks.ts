@@ -456,7 +456,7 @@ export function useMemberships(athleteId?: string) {
             let query = (supabase as any)
                 .from('memberships')
                 .select('*, membership_plans(name, price), profiles(full_name)')
-                .order('ends_at', { ascending: true })
+                .order('expires_at', { ascending: true })
 
             if (athleteId) query = query.eq('user_id', athleteId)
 
@@ -488,12 +488,16 @@ export function useMemberships(athleteId?: string) {
     useEffect(() => { fetchMemberships() }, [athleteId])
 
     const createMembership = async (payload: {
-        user_id: string; plan_id: string; starts_at: string; ends_at: string; notes?: string
+        user_id: string; plan_id: string; starts_at: string; expires_at: string; notes?: string
     }) => {
         try {
             const supabase = createClient()
+            // Fetch creator's tenant_id to persist
+            const { data: profile } = await supabase.from('profiles').select('tenant_id').eq('id', payload.user_id).single()
+
             await (supabase as any).from('memberships').insert({
                 ...payload,
+                tenant_id: profile?.tenant_id,
                 status: 'active',
             })
             await fetchMemberships()
@@ -510,7 +514,7 @@ export function useMemberships(athleteId?: string) {
 
     const expiringCount = memberships.filter((m: any) => {
         if (m.status !== 'active') return false
-        const daysLeft = Math.ceil((new Date(m.ends_at).getTime() - Date.now()) / 86400000)
+        const daysLeft = Math.ceil((new Date(m.expires_at).getTime() - Date.now()) / 86400000)
         return daysLeft <= 7 && daysLeft >= 0
     }).length
 

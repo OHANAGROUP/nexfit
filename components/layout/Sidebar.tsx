@@ -15,6 +15,9 @@ import {
     BarChart2,
     Bell,
     CreditCard,
+    FileText,
+    ImageIcon,
+    Target,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useNotifications, useMemberships } from '@/lib/supabase/hooks'
@@ -23,6 +26,7 @@ const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Users, label: 'Directorio', href: '/directorio' },
     { icon: Dumbbell, label: 'Protocolos', href: '/protocolos' },
+    { icon: Target, label: 'Mesociclos', href: '/protocolos/mesociclos' },
     { icon: LayoutList, label: 'Plantillas', href: '/plantillas' },
     { icon: CalendarDays, label: 'Calendario', href: '/calendario' },
     { icon: Apple, label: 'Nutrición', href: '/nutricion' },
@@ -30,6 +34,8 @@ const navItems = [
     { icon: BarChart2, label: 'Analytics', href: '/analytics' },
     { icon: Bell, label: 'Alertas', href: '/notificaciones', badge: true },
     { icon: CreditCard, label: 'Membresías', href: '/membresias', memberBadge: true },
+    { icon: FileText, label: 'Reportes', href: '/reportes' },
+    { icon: ImageIcon, label: 'Progreso', href: '/progreso' },
 ]
 
 

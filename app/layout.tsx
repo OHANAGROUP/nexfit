@@ -17,8 +17,22 @@ const exo2 = Exo_2({
 });
 
 export const metadata: Metadata = {
-    title: "NEXFIT - Multitenant Fitness System",
+    title: "NEXFIT - Bio-Core System",
     description: "Advanced fitness management for high-performance gyms.",
+    manifest: "/manifest.json",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "NEXFIT",
+    },
+};
+
+export const viewport = {
+    themeColor: "#0a0a0f",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
 };
 
 export default function RootLayout({
@@ -31,6 +45,17 @@ export default function RootLayout({
             <body className="antialiased font-exo2">
                 {children}
                 <MaviCoach />
+                <script
+                    dangerouslySetInnerHTML={{
+                        __html: `
+                            if ('serviceWorker' in navigator) {
+                                window.addEventListener('load', function() {
+                                    navigator.serviceWorker.register('/sw.js');
+                                });
+                            }
+                        `,
+                    }}
+                />
             </body>
         </html>
     );

@@ -76,10 +76,10 @@ Deno.serve(async (req) => {
 
         const { data: expiringMembs } = await supabase
             .from('memberships')
-            .select('id, user_id, tenant_id, ends_at, membership_plans(name), profiles!inner(full_name)')
+            .select('id, user_id, tenant_id, expires_at, membership_plans(name), profiles!inner(full_name)')
             .eq('status', 'active')
-            .gte('ends_at', today)
-            .lte('ends_at', inSevenDays)
+            .gte('expires_at', today)
+            .lte('expires_at', inSevenDays)
 
         for (const memb of (expiringMembs ?? [])) {
             const uid = memb.user_id
@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
 
             const name = (memb.profiles as any)?.full_name ?? 'Atleta'
             const planName = (memb.membership_plans as any)?.name ?? 'Plan'
-            const daysLeft = Math.ceil((new Date(memb.ends_at).getTime() - Date.now()) / 86400000)
+            const daysLeft = Math.ceil((new Date(memb.expires_at).getTime() - Date.now()) / 86400000)
 
             await supabase.from('notifications').insert({
                 tenant_id: memb.tenant_id,
@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
                 message: `La membresía "${planName}" de ${name} vence en ${daysLeft} día${daysLeft === 1 ? '' : 's'}. Renovar ahora.`,
                 severity: 'warning',
                 is_read: false,
-                metadata: { ends_at: memb.ends_at, plan: planName, days_left: daysLeft },
+                metadata: { expires_at: memb.expires_at, plan: planName, days_left: daysLeft },
             })
             results.membership_expiry++
         }
