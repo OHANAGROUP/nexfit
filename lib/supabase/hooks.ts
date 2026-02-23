@@ -89,6 +89,7 @@ export function useRoutine(athleteId: string | undefined) {
 
     useEffect(() => {
         async function fetchRoutine() {
+            // Demo fallback if no ID or explicitly '1' (mock athlete)
             if (!athleteId || athleteId === '1') {
                 setRoutine(MOCK_ROUTINES.filter(r => r.user_id === '1'))
                 setIsMock(true)
@@ -98,6 +99,7 @@ export function useRoutine(athleteId: string | undefined) {
 
             try {
                 const supabase = createClient()
+                // Fetch exercise data linked through activity_logs
                 const { data, error } = await supabase
                     .from('activity_logs')
                     .select('*, exercises(*)')
@@ -107,6 +109,7 @@ export function useRoutine(athleteId: string | undefined) {
                     setRoutine(data)
                     setIsMock(false)
                 } else {
+                    // Fallback to mock if table is empty for this user but exists
                     setRoutine(MOCK_ROUTINES.filter(r => r.user_id === '1'))
                     setIsMock(true)
                 }

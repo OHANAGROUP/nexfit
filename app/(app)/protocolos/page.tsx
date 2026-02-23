@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import toast from 'react-hot-toast'
 import {
     Dumbbell,
     ChevronLeft,
@@ -16,7 +18,11 @@ import { useRoutine, useAuth } from '@/lib/supabase/hooks'
 
 export default function ProtocolosPage() {
     const { user } = useAuth()
-    const { routine, loading } = useRoutine(user?.id)
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const athleteId = searchParams.get('athleteId') || user?.id
+
+    const { routine, loading, isMock } = useRoutine(athleteId)
     const [exercises, setExercises] = useState<any[]>([])
     const [selectedExercise, setSelectedExercise] = useState<any>(null)
 
@@ -42,7 +48,20 @@ export default function ProtocolosPage() {
         )
     }
 
-    if (!selectedExercise) return null
+    if (!selectedExercise) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                <Dumbbell className="w-12 h-12 text-nex-muted opacity-20" />
+                <p className="text-nex-muted font-black uppercase tracking-[0.3em] text-[10px]">No hay protocolos activos para esta unidad.</p>
+                <button
+                    onClick={() => router.push('/directorio')}
+                    className="mt-4 px-6 py-2 rounded-xl bg-nex-purple/10 border border-nex-purple/20 text-nex-purple text-[10px] font-bold uppercase tracking-widest hover:bg-nex-purple hover:text-white transition-all"
+                >
+                    Volver al Directorio
+                </button>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-12">
@@ -54,7 +73,7 @@ export default function ProtocolosPage() {
                             Athlete Protocol
                         </span>
                         <span className="text-[10px] text-nex-neon font-bold uppercase tracking-widest flex items-center gap-1">
-                            <Zap className="w-3 h-3" /> Bio-Sync Active: {user?.user_metadata?.full_name || 'ATHLETE UNIT'}
+                            <Zap className="w-3 h-3" /> Bio-Sync Active: {isMock ? 'UNIT DEMO' : 'UNIT ENROLLED'}
                         </span>
                     </div>
                     <h1 className="text-5xl md:text-6xl font-black font-rajdhani uppercase tracking-tighter italic">
@@ -71,7 +90,10 @@ export default function ProtocolosPage() {
                         </div>
                     </div>
                 </div>
-                <button className="text-nex-muted hover:text-nex-white flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest transition-all">
+                <button
+                    onClick={() => router.push('/directorio')}
+                    className="text-nex-muted hover:text-nex-white flex items-center gap-2 font-bold uppercase text-[10px] tracking-widest transition-all"
+                >
                     <ChevronLeft className="w-4 h-4" /> Volver al Directorio
                 </button>
             </header>
@@ -127,7 +149,10 @@ export default function ProtocolosPage() {
                             </div>
                         ))}
 
-                        <button className="w-full py-6 rounded-3xl border-2 border-dashed border-white/5 text-nex-muted hover:bg-white/5 transition-all text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-2">
+                        <button
+                            onClick={() => toast.success('Módulo Premium: Próximamente disponible en v3.12')}
+                            className="w-full py-6 rounded-3xl border-2 border-dashed border-white/5 text-nex-muted hover:bg-white/5 transition-all text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-2"
+                        >
                             <Lock className="w-3 h-3" /> Añadir Ejercicio Premium
                         </button>
                     </div>
@@ -140,7 +165,7 @@ export default function ProtocolosPage() {
                             <Dumbbell className="w-4 h-4 text-nex-neon" /> Análisis de Ejecución
                         </h3>
                         <span className="text-[9px] font-bold text-nex-muted uppercase tracking-widest bg-white/5 border border-white/10 px-3 py-1 rounded-full">
-                            Ejercicio ID: {selectedExercise.id}
+                            Unidad ID: {athleteId?.slice(0, 8) || 'UNIT'}
                         </span>
                     </div>
 
@@ -168,7 +193,10 @@ export default function ProtocolosPage() {
                                 Mantén una tensión constante en la fase excéntrica. Evita el balanceo inercial para maximizar la activación del {selectedExercise.exercises?.muscle_group}.
                             </p>
                             <div className="mt-6 border-t border-white/5 pt-4">
-                                <button className="text-nex-neon text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform">
+                                <button
+                                    onClick={() => toast.success('Neo-Streaming: Próximamente en v3.12')}
+                                    className="text-nex-neon text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform"
+                                >
                                     Ver Video de Ejecución <Zap className="w-3 h-3" />
                                 </button>
                             </div>
