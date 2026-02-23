@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import toast from 'react-hot-toast'
 import {
@@ -16,7 +16,7 @@ import { MuscleMapDisplay } from '@/components/exercises/MuscleMapDisplay'
 import { cn } from '@/lib/utils'
 import { useRoutine, useAuth } from '@/lib/supabase/hooks'
 
-export default function ProtocolosPage() {
+function ProtocolosContent() {
     const { user } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -205,5 +205,18 @@ export default function ProtocolosPage() {
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function ProtocolosPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                <Loader2 className="w-12 h-12 text-nex-purple animate-spin" />
+                <p className="text-nex-muted font-black uppercase tracking-[0.3em] text-[10px]">Cargando Sistema...</p>
+            </div>
+        }>
+            <ProtocolosContent />
+        </Suspense>
     )
 }
