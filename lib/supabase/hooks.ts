@@ -30,34 +30,56 @@ export function useAthletes() {
     const [loading, setLoading] = useState(true)
     const [isMock, setIsMock] = useState(false)
 
-    useEffect(() => {
-        async function fetchAthletes() {
-            try {
-                const supabase = createClient()
-                const { data, error } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('role', 'member')
+    const fetchAthletes = async () => {
+        try {
+            const supabase = createClient()
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('role', 'member')
 
-                if (!error && data && data.length > 0) {
-                    setAthletes(data)
-                    setIsMock(false)
-                } else {
-                    setAthletes(MOCK_ATHLETES)
-                    setIsMock(true)
-                }
-            } catch (err) {
-                setIsMock(true)
+            if (!error && data && data.length > 0) {
+                setAthletes(data)
+                setIsMock(false)
+            } else {
                 setAthletes(MOCK_ATHLETES)
-            } finally {
-                setLoading(false)
+                setIsMock(true)
             }
+        } catch (err) {
+            setIsMock(true)
+            setAthletes(MOCK_ATHLETES)
+        } finally {
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         fetchAthletes()
     }, [])
 
-    return { athletes, loading, isMock }
+    const createAthlete = async (athlete: { full_name: string, email?: string, goal?: string, role?: string }) => {
+        try {
+            const supabase = createClient()
+            // 1. Get current user profile for tenant_id
+            const { data: currentProfile } = await supabase.auth.getUser()
+            const { data: profile } = await supabase.from('profiles').select('tenant_id').eq('id', currentProfile.user?.id).single()
+
+            // 2. Insert new athlete profile
+            const { error } = await supabase.from('profiles').insert({
+                ...athlete,
+                id: crypto.randomUUID(), // Profiles usually don't have auth link yet if manual
+                tenant_id: profile?.tenant_id,
+                role: athlete.role || 'member'
+            })
+
+            if (!error) await fetchAthletes()
+            return { error }
+        } catch (err) {
+            return { error: err }
+        }
+    }
+
+    return { athletes, loading, isMock, createAthlete, refreshAthletes: fetchAthletes }
 }
 
 export function useRoutine(athleteId: string | undefined) {

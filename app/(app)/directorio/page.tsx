@@ -18,13 +18,29 @@ import { useAthletes, useAuth } from '@/lib/supabase/hooks'
 
 export default function DirectorioPage() {
     const { user } = useAuth()
-    const { athletes, loading } = useAthletes()
+    const { athletes, loading, createAthlete } = useAthletes()
     const [searchQuery, setSearchQuery] = useState('')
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
+    const [newAthlete, setNewAthlete] = useState({ full_name: '', email: '', goal: '' })
+    const [isSaving, setIsSaving] = useState(false)
 
     const filteredAthletes = athletes.filter(a =>
         a.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         a.role?.toLowerCase().includes(searchQuery.toLowerCase())
     )
+
+    const handleRegister = async (e: React.FormEvent) => {
+        e.preventDefault()
+        setIsSaving(true)
+        const { error } = await createAthlete(newAthlete)
+        setIsSaving(false)
+        if (!error) {
+            setIsRegisterModalOpen(false)
+            setNewAthlete({ full_name: '', email: '', goal: '' })
+        } else {
+            alert('Error al registrar atleta: ' + (error as any).message)
+        }
+    }
 
     if (loading) {
         return (
@@ -55,7 +71,10 @@ export default function DirectorioPage() {
                         Gestión centralizada de perfiles y biométricos de alto rendimiento.
                     </p>
                 </div>
-                <button className="bg-nex-white text-nex-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest font-rajdhani text-lg hover:bg-nex-neon transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-xl">
+                <button
+                    onClick={() => setIsRegisterModalOpen(true)}
+                    className="bg-nex-white text-nex-black px-8 py-4 rounded-2xl font-black uppercase tracking-widest font-rajdhani text-lg hover:bg-nex-neon transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-xl"
+                >
                     <UserPlus className="w-5 h-5" />
                     Registrar Atleta
                 </button>
@@ -151,6 +170,80 @@ export default function DirectorioPage() {
                     <p className="text-nex-muted text-xs uppercase font-bold tracking-widest">No se encontraron unidades con ese parámetro.</p>
                 </div>
             )}
+
+            {/* Registration Modal */}
+            {isRegisterModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-nex-black/80 backdrop-blur-xl animate-in fade-in duration-300">
+                    <div className="w-full max-w-lg glass-card p-8 border-white/10 relative overflow-hidden">
+                        {/* Technical Background */}
+                        <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
+                            <UserPlus className="w-32 h-32 text-nex-neon" />
+                        </div>
+
+                        <h2 className="text-3xl font-black font-rajdhani uppercase italic mb-8 flex items-center gap-3">
+                            Registrar <span className="text-nex-neon">Nueva Bio-Unidad</span>
+                        </h2>
+
+                        <form onSubmit={handleRegister} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-nex-muted uppercase tracking-[0.2em] ml-1">Identidad Completa</label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newAthlete.full_name}
+                                    onChange={e => setNewAthlete({ ...newAthlete, full_name: e.target.value })}
+                                    placeholder="NOMBRE Y APELLIDO..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-nex-white outline-none focus:border-nex-neon transition-all"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-nex-muted uppercase tracking-[0.2em] ml-1">Email / Enlace</label>
+                                <input
+                                    type="email"
+                                    value={newAthlete.email}
+                                    onChange={e => setNewAthlete({ ...newAthlete, email: e.target.value })}
+                                    placeholder="BIO@SYNAPSE.NET (OPCIONAL)..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-nex-white outline-none focus:border-nex-neon transition-all"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="block text-[10px] font-black text-nex-muted uppercase tracking-[0.2em] ml-1">Objetivo Metabolic</label>
+                                <select
+                                    value={newAthlete.goal}
+                                    onChange={e => setNewAthlete({ ...newAthlete, goal: e.target.value })}
+                                    className="w-full bg-[#1A1A1A] border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-nex-white outline-none focus:border-nex-neon transition-all appearance-none"
+                                >
+                                    <option value="">SELECCIONAR TARGET...</option>
+                                    <option value="strength">FUERZA PURA / STRENGTH</option>
+                                    <option value="hypertrophy">HIPERTROFIA / MASA</option>
+                                    <option value="performance">RENDIMIENTO / PERFORMANCE</option>
+                                    <option value="health">SALUD / LONGEVIDAD</option>
+                                </select>
+                            </div>
+
+                            <div className="flex gap-4 pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsRegisterModalOpen(false)}
+                                    className="flex-1 py-4 rounded-2xl font-black uppercase tracking-widest text-nex-muted border border-white/5 hover:bg-white/5 transition-all text-xs"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className="flex-[2] bg-nex-white text-nex-black py-4 rounded-2xl font-black uppercase tracking-widest font-rajdhani text-lg hover:bg-nex-neon transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                                >
+                                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Sincronizar Bio-Data'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
+
